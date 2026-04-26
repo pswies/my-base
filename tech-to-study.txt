@@ -1,0 +1,12 @@
+TODO
+* ArgoCD operator
+* Helm
+* Sidecar
+* Prometheus
+* Grafana
+* OpenTelemetry and its satellite tech
+* Running as non-root
+* Permissions control: cluster-wide, narrower (namespace-wide?)
+
+* https://backstage.io/
+* https://www.crossplane.io/

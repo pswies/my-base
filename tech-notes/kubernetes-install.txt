@@ -1,0 +1,29 @@
+Everything below assumes you are root.
+
+1. Install Docker
+2. Follow https://kubernetes.io/docs/setup/production-environment/container-runtimes/#docker
+3. Follow https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
+4. Create a cluster:
+  a) Start with:
+     https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/
+  b) When you reach `kubeadm init <args>`
+     jump to: https://docs.projectcalico.org/getting-started/kubernetes/quickstart
+     Do:
+     kubeadm init --pod-network-cidr=192.168.0.0/16
+     This prepares the cluster for Calico CNI.
+  c) Set up shell. Add:
+     export KUBECONFIG=/etc/kubernetes/admin.conf
+     to /etc/bash.bashrc
+  d) Install Calico:
+     kubectl create -f https://docs.projectcalico.org/manifests/tigera-operator.yaml
+     kubectl create -f https://docs.projectcalico.org/manifests/custom-resources.yaml
+5. Verify that all's fine:
+   watch kubectl get pods --all-namespaces
+6. Remove the taints on the master so that you can schedule pods on it:
+   kubectl taint nodes --all node-role.kubernetes.io/master-
+7. Confirm that you now have a node in your cluster with the following command.
+   kubectl get nodes -o wide
+8. Check how to add new nodes with:
+   kubeadm token create --print-join-command
+9. Enable kubectl auto-completion
+   kubectl completion bash >/etc/bash_completion.d/kubectl

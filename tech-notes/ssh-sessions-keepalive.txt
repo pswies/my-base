@@ -1,0 +1,10 @@
+On client in /etc/ssh/ssh_config add:
+Host *
+    ServerAliveInterval 30
+
+On server in /etc/ssh/sshd_config add:
+    ClientAliveInterval 60
+    TCPKeepAlive yes
+    ClientAliveCountMax 10000
+
+-- https://unix.stackexchange.com/questions/200239/how-can-i-keep-my-ssh-sessions-from-freezing/200256#200256

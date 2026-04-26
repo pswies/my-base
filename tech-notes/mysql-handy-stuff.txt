@@ -1,0 +1,30 @@
+nowy user i baza:
+    CREATE USER 'username'@'localhost' IDENTIFIED BY 'password';
+    GRANT USAGE ON * . * TO 'username'@'localhost' IDENTIFIED BY 'password' WITH MAX_QUERIES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0 MAX_USER_CONNECTIONS 0 ;
+    CREATE DATABASE IF NOT EXISTS `username` CHARACTER SET utf8 COLLATE utf8_general_ci; /* utf8_bin will allow for true sorting but may cause problems */
+    GRANT ALL PRIVILEGES ON `username` . * TO 'username'@'localhost';
+
+mysql -h $WORDPRESS_DB_HOST -u root -p$MYSQL_ROOT_PASSWORD <<EOT
+CREATE DATABASE $WORDPRESS_DB_NAME;
+CREATE USER '$WORDPRESS_DB_USER'@'%' IDENTIFIED BY '$WORDPRESS_DB_PASSWORD';
+GRANT ALL PRIVILEGES ON $WORDPRESS_DB_NAME.* TO '$WORDPRESS_DB_USER'@'%';
+FLUSH PRIVILEGES;
+EOT
+
+----------
+
+zmiana hasła usera:
+    SET PASSWORD FOR 'tom'@'localhost' = PASSWORD('foobar');
+    flush privileges;
+
+podgląd wiszących transakcji i locków:
+    show engine innodb status;
+    
+    http://www.xaprb.com/blog/2007/09/18/how-to-debug-innodb-lock-waits/
+
+ubijanie wiszących transakcji:
+    www.markleith.co.uk/2011/05/31/finding-and-killing-long-running-innodb-transactions-with-events/
+
+podgląd stanu replikacji:
+    show slave status;
+

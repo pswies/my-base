@@ -1,0 +1,33 @@
+# pomogło:
+
+Install alsa-tools and alsa-tools-gui, you are looking for a program named hdajackretask.
+Fire hdajackretask up as root.
+Choose Conexant cx20751/2 in the codec field.
+Click on "show unconnected pins", a pin with the id 0x18 should show up with the remark that it is not connected.
+Click on override and choose headphones in the drop down menu.
+
+Click on apply now. If you get
+    /sys/class/sound/hwC0D0/reconfig: Device or resource busy
+
+look into this thread and search for device or resource busy and do what he tells you to.
+If it worked, a field in alsamixer shows up with the name "auto mute".
+Check that it is enabled and you're good to go.
+
+-- https://askubuntu.com/questions/585709/headphones-not-recognized#598463
+
+
+# stare, raczej nie pomagają:
+
+sudo apt remove --purge alsa-base pulseaudio
+sudo apt install alsa-base pulseaudio
+sudo apt-get remove --purge alsa-base
+sudo apt-get remove --purge alsa-base -y
+
+sudo vim /etc/modprobe.d/alsa-base.conf
+#options snd-hda-intel model=thinkpad
+#options snd-hda-intel model=thinkpad position_fix=1 enable=yes
+#options snd-hda-intel model=auto
+#options snd-hda-intel model=auto position_fix=1 enable=yes
+options snd-hda-intel model=laptop
+
+REBOOT 100 TIMES, MAYBE RUN WINDOWS FROM TIME TO TIME.

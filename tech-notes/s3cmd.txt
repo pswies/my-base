@@ -1,0 +1,3 @@
+apt install s3cmd
+s3cmd --configure  # ~/.s3cmd now contains S3 credentials
+

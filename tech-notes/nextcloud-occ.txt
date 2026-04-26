@@ -1,0 +1,14 @@
+# see: https://github.com/nextcloud/docker/issues/1413
+
+apt update && apt install sudo
+sudo -u www-data PHP_MEMORY_LIMIT=512M php occ <your command>
+
+
+# example session:
+
+apt update && apt install sudo
+chown -R www-data.www-data config data
+sudo -u www-data PHP_MEMORY_LIMIT=1024M php occ status
+sudo -u www-data PHP_MEMORY_LIMIT=1024M php occ maintenance:mode --on
+sudo -u www-data PHP_MEMORY_LIMIT=1024M php occ upgrade
+sudo -u www-data PHP_MEMORY_LIMIT=1024M php occ maintenance:mode --off

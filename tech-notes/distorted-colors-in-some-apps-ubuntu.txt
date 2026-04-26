@@ -1,0 +1,2 @@
+xprop -root -remove _ICC_PROFILE
+-- https://ubuntuforums.org/showthread.php?t=2441583&p=13950051

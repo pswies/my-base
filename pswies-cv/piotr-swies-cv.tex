@@ -1,0 +1,242 @@
+\documentclass[12pt,a4paper]{article}
+
+% Packages
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{multicol}
+\usepackage{parskip}
+\usepackage{lmodern}
+\usepackage{wrapfig}
+\usepackage{setspace}
+\usepackage[tracking=true]{microtype}
+
+% Define colors
+\definecolor{headerblue}{RGB}{40,70,200}
+\definecolor{accentblue}{RGB}{50,80,220}
+
+% Hyperlink setup
+\hypersetup{
+    colorlinks=true,
+    linkcolor=accentblue,
+    urlcolor=accentblue,
+    citecolor=accentblue
+}
+
+% Section formatting
+\titleformat{\section}
+  {\color{headerblue}\Large\bfseries\uppercase}
+  {}
+  {0em}
+  {}
+  [\titlerule]
+
+\titleformat{\subsection}
+  {\normalsize\bfseries}
+  {}
+  {0em}
+  {}
+
+% Remove page numbers
+\pagestyle{empty}
+
+% List formatting
+\setlist[itemize]{left=0pt, itemsep=0.3em, topsep=0.3em}
+
+\begin{document}
+
+% Header
+\begin{minipage}[t]{0.7\textwidth}
+  {\color{headerblue}\Huge\bfseries Piotr Święs}
+
+  \vspace{1em}
+  pswies@protonmail.com \enspace | \enspace +48 605140206
+  
+  \vspace{0.3em}
+  \href{https://www.linkedin.com/in/piotrswies}{\textls[36]{https://www.linkedin.com/in/piotrswies}}
+\end{minipage}
+
+\vspace{1em}
+
+% Summary with photo
+\begin{wrapfigure}[10]{l}[0pt]{0.3\textwidth}
+  \vspace{-12pt}
+  \includegraphics[width=0.28\textwidth]{ja-cv-2026.jpg}
+\end{wrapfigure}
+
+\begin{spacing}{1.2}
+\noindent A software engineer with over \textbf{15 years} of experience and a \textbf{diverse} skill set. Recently focused on \textbf{SRE/DevOps} and \textbf{cloud computing}, after spending years as a \textbf{backend} and \textbf{full-stack} developer. 
+Fluent in \textbf{Python}, proficient in \textbf{Linux}, with extensive knowledge of the \textbf{Web}, its protocols, and standards. An expert in \textbf{architecting} scalable \textbf{distributed} systems, with hands-on experience in \textbf{machine learning} and data \textbf{engineering}. 
+Passionate about \textbf{AI}, game theory, and multi-agent simulations. Currently exploring the depths of \textbf{Golang}. Well-organized in \textbf{remote} work environment. A seasoned \textbf{tech leader} and engineering manager. 
+Has collaborated with several startups (\textbf{Web3/blockchain/DeFi, IoT, NLP}). An open-minded person with strong \textbf{soft skills} and entrepreneurial achievements. A \textbf{Mensa} member. Released a casual mobile \textbf{game}. 
+Holds a master's degree in \textbf{philosophy} (with a thesis on Artificial Consciousness).
+\end{spacing}
+
+\vspace{1em}
+
+\section{Technical Skills}
+
+\begin{itemize}
+  \item \textbf{GENERAL:} distributed systems, microservice architecture, cloud computing, immutable infrastructure and containerization, SRE methodology, async programming, Web standards, SOLID principles, agile methodologies
+
+  \item \textbf{DEVOPS/SRE:} Linux, UNIX, GCP, AWS, Terraform, Consul, Vault, Github Actions, Jenkins, Drone, Nginx, Prometheus, Grafana, Datadog, Sentry, Statsig, PagerDuty
+
+  \item \textbf{LANGUAGES:} Python, Go, Rust, JS/Typescript, BASH, C\#, Java, C, C++, Lua, PHP
+
+  \item \textbf{DATABASES:} SQL (PostgreSQL, MySQL, DB2, Redshift), NoSQL (MongoDB, Firestore, Redis, Elastic Search, Cassandra, Memcache), Graph (Neo4j), BigQuery
+  
+  \item \textbf{CONTAINERS \& ORCHESTRATION:} Kubernetes, Docker, Helm, ArgoCD, Nomad
+
+  \item \textbf{WEB:} React, Next.js, Python frameworks (Flask, FastAPI, Django, Pylons, Pyramid, Falcon), OpenAPI
+
+  \item \textbf{ML:} ScikitLearn, NumPy/Pandas, NLP
+
+  \item \textbf{LLM:} LMStudio, MCP
+
+  \item \textbf{MESSAGING \& STREAMING:} Kafka, AWS SNS, Google PubSub, RabbitMQ, Celery
+
+  \item \textbf{BLOCKCHAIN:} Cosmos, Ethereum, EVM-based chains
+
+  \item \textbf{GAMEDEV:} Unity, Solar2D (Corona)
+
+  \item \textbf{ETL:} Airflow
+\end{itemize}
+
+\section{Professional Experience}
+
+\begin{itemize}[left=0pt]
+  \item \textbf{dYdX OpsDAO} (09.2023 -- now as: \textbf{Lead SRE}, \textit{remote})
+
+  Built deployment and observability infrastructure for dYdX decentralized exchange. Managed an AWS organization with multi-account IaC. Developed several standalone services in Go and Python for signing blockchain transactions, fraud detection, synthetic testing, communication with blockchain validators. Participated in on-call rotations for managing a mission-critical distributed indexing service for the dYdX exchange. Developed monitoring dashboards and alerts. Managed a blockchain node.
+
+  \textit{Tech stack:} AWS, Terraform, Python, Go, Typescript, Cosmos SDK, Kafka, PostgreSQL, Redis, Prometheus, Datadog, Github Actions.
+
+  \item \textbf{Nansen} (10.2021 -- 07.2023 as: \textbf{Senior SRE/Engineering Manager (hands-on)}, \textit{remote})
+
+  Led the SRE team from a hands-on perspective. Maintained and proactively improved Nansen's large distributed, cloud-based system: developed infrastructure-as-code, networking, permissions; helped developers with architectural choices, set up CI/CD automation, optimized systems, set up monitoring, alerting, helped with SLOs; evangelized the SRE culture in the organization. Nansen is an analytics platform for the crypto space, supporting multiple blockchains and web3-based assets. It featured high-volume blockchain ETL pipelines.
+
+  \textit{Tech stack:} Terraform, Python, Kubernetes, PostgreSQL, Airflow, Redis, Github Actions, GCP (BigQuery, Pub/Sub, CloudBuild, CloudRun, GKE, GCS, Firebase, Composer, CloudSQL and more).
+
+  \item \textbf{Swiftlane} (09.2020 -- 09.2021 as: \textbf{Backend Engineer}, \textit{remote})
+
+  Developed a system for door access control based on face recognition and mobile device credentials. Designed logic for automatic firmware updates and monitoring of a fleet of IoT devices. Built microservices for custom integrations among various door and camera vendors.
+
+  \textit{Tech stack:} Python, GCP (AppEngine, IoTCore, Firestore), Kubernetes, PostgreSQL, React.
+
+  \item \textbf{Lingaro} (05.2020 -- 08.2020 as: \textbf{Technical Lead / Python Evangelist}, \textit{remote})
+
+  Developed a Spark-based company ETL system, provided technical mentorship, implemented best coding practices related to Python projects, co-implemented agile methodologies in the team.
+
+  \textit{Tech stack:} Python, Apache Spark, Microsoft Azure, SQL Server.
+
+  \item \textbf{Dock, Verifiable, Remote.com} (a team that underwent several rebrandings; 08.2017 -- 04.2020 as: \textbf{Senior Software Engineer}, \textit{remote})
+
+  \begin{itemize}
+    \item Developed Dock's decentralized protocol for professional data, reputations, and networking management, based on Ethereum blockchain. Developed an application for issuing digital certificates anchored on the blockchain. The produced certificates were compatible with Mozilla Open Badges and their authenticity could be verified online by anyone.
+
+    \item Built Verifiable's system for issuing and verifying digital certificates. Verifiable helped traditional certificate providers like universities to scale by enabling them to switch from paper-based documents to digital ones.
+
+    \item Developed backend for Remote.com, a job-search service built as a distributed system handling millions of users and job offers.
+  \end{itemize}
+
+  \textit{Tech stack:} Python, MongoDB, Celery, Redis, ElasticSearch, AWS, Blockcerts, Open Badges, Ethereum
+
+  \item \textbf{Hunted Hive} (01.2017 -- 08.2017 as: \textbf{Software Engineer / Data Engineer}, \textit{remote})
+
+  Developed a distributed system for generalized event prediction, especially related to certain sports.
+
+  \textit{Tech stack:} Python, ScikitLearn, Pandas, Celery, Redis, PostgreSQL
+
+  \item \textbf{Danske Bank} (09.2016 -- 12.2016 as: \textbf{Senior Software Engineer})
+
+  Core Banking Infrastructure - developed an API for the bank's internal communication as a part of the Anti-Money Laundering project and implemented the Scrum process in the team.
+
+  \textit{Tech stack:} PL/I, z/OS, IBM mainframe, DB2
+
+  \item \textbf{Webinterpret} (09.2011 -- 06.2016)
+
+  \begin{itemize}
+    \item as \textbf{Machine Translation Engineer:} Co-designed and implemented natural language translation software. Created a machine-learning-based system for detecting brand names within item titles, wrote an optimization framework for tuning parameters of a black-box subsystem and developed an automatic size conversion mechanism.
+
+    \textit{Tech stack:} Scikit-Learn, Numpy, Pandas
+
+    \item as \textbf{Senior Software Engineer, Tech-lead:} Developed a company's large-scale distributed system for managing online sales worldwide which included automatic translations of item descriptions, sales tracking and real-time stock synchronization between different marketplaces and developed a subsystem for integration with Amazon online store. Tech-lead for 6 developers.
+
+    \textit{Tech stack:} Python, MySQL, MongoDB, RabbitMQ, Memcache, Cassandra, Amazon Web Services, Nagios, Jenkins.
+
+    \textit{Numbers:} thousands of clients, millions of online items, 400+ AWS machines, terabytes of database storage, tens of thousands of DB operations per second.
+  \end{itemize}
+
+  \item \textbf{Various software engineer roles} (2006-2011)
+
+  T-sign Studios, Pleyar, Office 123, B2, Franklin Aircraft Engines, Soft-Tech
+\end{itemize}
+
+\section{Personal Projects}
+
+\begin{itemize}
+  \item \textbf{Dododo:} a funky, retro-looking mobile arcade puzzle. The essence of the gameplay is to navigate the egg through mazes by using as few waypoints as possible (\href{https://forums.tigsource.com/index.php?topic=67267.0}{Tigsource link}).
+
+  \textit{Tech stack:} Solar2D, Gimp, Android/iOS
+
+  \item \textbf{storyline.ninja:} an online service for collaboratively creating branched stories to be played as a multiplayer asynchronous RPGs.
+
+  \textit{Tech stack:} NextJS, Golang, PostgreSQL, Kubernetes, Terraform
+
+  \item \textbf{musicgranar.pl:} a website for discovering and downloading music pieces by contemporary Polish composers.
+
+  \textit{Tech stack:} NextJS, PostgreSQL, Python, Kubernetes, Terraform, GCP tools
+\end{itemize}
+
+\section{Classical Education}
+
+\begin{itemize}
+  \item \textbf{University of Warsaw} -- \textbf{philosophy, MA} (2006 -- 2017), master's thesis entitled: ``Artificial Consciousness - Contemporary Debate on the Possibility of Creating an Autonomous Mind''.
+
+  \item \textbf{Secondary school} -- \textbf{mathematics / IT} profile class
+\end{itemize}
+
+\section{Online Education and Certifications}
+
+\begin{itemize}
+  \item \textbf{Certified Kubernetes Application Developer (CKAD)} by The Linux Foundation
+
+  \item \textbf{Artificial Intelligence: Principles and Techniques} XCS221, Stanford Online
+
+  \item \textbf{Artificial Intelligence (AI) - CSMM.101x} by Ansaf Salleb-Aouissi, ColumbiaX
+
+  \item \textbf{Machine Learning} by Emily Fox and Carlos Guestrin, University of Washington (5 courses specialization)
+
+  \item \textbf{Machine Learning} by Andrew Ng, Stanford University
+
+  \item \textbf{Algorithms: Design and Analysis} by Tim Roughgarden, Stanford University
+
+  \item \textbf{Cloud DevOps Engineer} by Google (5-course specialization)
+\end{itemize}
+
+\section{Additional Information}
+
+\begin{itemize}
+  \item A member of Mensa, the largest and oldest high-IQ society in the world.
+
+  \item Scored in the first half of \textit{Escape from dev/null}, a hackathon organized by Google.
+
+  \item \textbf{Interests:} philosophy of mind, artificial intelligence and machine consciousness, ethics, artificial life, GO game, composing and playing music, science-fiction books.
+
+  \item \textbf{Languages:} native Polish, fluent English, intermediate Spanish, basic German.
+
+  \item \textbf{Personality:} I consider myself an honest, intelligent and cool-headed person. In proper circumstances I happen to have a sense of humour.
+\end{itemize}
+
+\vspace{1em}
+
+{\small\itshape
+I agree to the processing of personal data provided in this document for realizing the recruitment process pursuant to the Personal Data Protection Act of 10 May 2018 (Journal of Laws 2018, item 1000) and in agreement with Regulation (EU) 2016/679 of the European Parliament and of the Council of 27 April 2016 on the protection of natural persons with regard to the processing of personal data and on the free movement of such data, and repealing Directive 95/46/EC (General Data Protection Regulation)
+}
+
+\end{document}

@@ -1,0 +1,22 @@
+# Example service: cardpay-api
+
+
+# Local script, `deploy-remote.sh`:
+#!/bin/bash
+docker build -t cardpay-api .
+docker save -o meta/cardpay-api.docker cardpay-api
+scp -i ./meta/cardpay-keypair.pem ./meta/cardpay-api.docker ubuntu@ec2-3-250-14-45.eu-west-1.compute.amazonaws.com:~
+alias remote='ssh -i ./meta/cardpay-keypair.pem ubuntu@ec2-3-250-14-45.eu-west-1.compute.amazonaws.com'
+remote '/home/ubuntu/restart-cardpay-api.sh'
+
+
+# Remote script, `restart-cardpay-api.sh`:
+#!/bin/bash
+docker load -i /home/ubuntu/cardpay-api.docker
+docker container stop cardpay-api
+docker container rm cardpay-api
+docker run -it -d --restart always -p 80:80 \
+    --env-file /home/ubuntu/cardpay-api.env \
+    --name cardpay-api \
+    cardpay-api
+

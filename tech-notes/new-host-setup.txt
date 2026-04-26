@@ -1,0 +1,32 @@
+* apt update && apt upgrade -y
+* upgrade to the newest LTS release
+* vim /etc/profile <== source /etc/bash.bashrc
+* vim /etc/bash.bashrc <== export EDITOR=/usr/bin/vim
+* increase nginx security (see: nginx-security.txt)
+* vim /etc/gitconfig <== <my-git-config>
+* vim /etc/vim/vimrc <== <my-vimrc>
+* crontab -e <== apt update && apt upgrade -y  # every day
+* crontab -e <== configure backups  # every day
+* make sure your docker data is in a dir with a lot of space
+* hostname <your-hostname>
+* set up a key-based login:
+    ssh-keygen -t ecdsa -b 521
+    ssh-copy-id -i ~/.ssh/id_ecdsa root@the-server
+* set up host-based ssh keys if needed, register them e.g. on Bitbucket
+* consider automating ssh-agent start on login, like this (in ~/.profile):
+    # start ssh-agent on each login
+    if [ -z "$SSH_AUTH_SOCK" ] ; then
+      eval `ssh-agent`
+      ssh-add
+    fi
+    # kill ssh-agent on each logout
+    trap 'test -n "$SSH_AUTH_SOCK" && eval `/usr/bin/ssh-agent -k`' 0
+* setup the basic firewall (ufw stands for Uncomplicated FireWall):
+    ufw allow 22  # not to lock ourselves out
+    ufw enable  # should close everything but ssh
+    ufw allow...
+    ufw status verbose
+    # test from elsewhere with:
+    nc -vz yourhost 22
+    nc -vz yourhost 80
+    ...

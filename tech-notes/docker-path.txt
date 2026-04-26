@@ -1,0 +1,6 @@
+(as was on Charlie)
+* Docker data dir is configured to: `/mnt/ebs50/docker-data`. This path is set in `/etc/default/docker`.
+  There is also the running dir, `/var/lib/docker` by default.
+  This is set to `/mnt/ebs50/var-lib-docker` by editing: /lib/systemd/system/docker.service . For details see:
+  https://linuxconfig.org/how-to-move-docker-s-default-var-lib-docker-to-another-directory-on-ubuntu-debian-linux
+
