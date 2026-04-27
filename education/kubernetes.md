@@ -140,10 +140,10 @@
 
 ### 14. Helm
 
-* [ ] Charts
-* [ ] Templates
-* [ ] Values
-* [ ] Release lifecycle
+* [x] Charts
+* [x] Templates
+* [x] Values
+* [x] Release lifecycle
 
 ---
 
@@ -191,7 +191,7 @@
 
 ## ▶️ Current Progress
 
-**Completed:** Basic Level (1–5), Configuration & Secrets (Subject 6), Storage (Subject 7), Workload Patterns (Subject 8), Ingress & Traffic Management (Subject 9)
-**Next:** Resource Management (Subject 10)
+**Completed:** Basic Level (1–5), Subjects 6–14
+**Next:** Operators & CRDs (Subject 15)
 
 ---

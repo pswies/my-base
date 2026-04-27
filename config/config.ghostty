@@ -1,0 +1,14 @@
+# Link into:
+# ~/.config/ghostty/config
+#
+# Nice themes:
+# Idea, Hurtado, Hardcore, Github Dark, Framer, Dimmed Molokai, Dimidium, Deep, Darkside,
+# Challenger Deep, CGA, Catppuccin Frappe, Catppuccin Macchiato, Black Metal (Immortal),
+# Atom One Dark, Andromeda, Alien Blood, Afterglow, 3024 Night
+
+theme = Hurtado
+
+split-divider-color = #444444
+
+keybind = shift+up=scroll_page_lines:-1
+keybind = shift+down=scroll_page_lines:1
