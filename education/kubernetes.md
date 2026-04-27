@@ -149,9 +149,9 @@
 
 ### 15. Operators & CRDs
 
-* [ ] Custom Resource Definitions (CRDs)
-* [ ] Controller pattern implementation
-* [ ] Operator model
+* [x] Custom Resource Definitions (CRDs)
+* [x] Controller pattern implementation
+* [x] Operator model
 
 ---
 
@@ -191,7 +191,7 @@
 
 ## ▶️ Current Progress
 
-**Completed:** Basic Level (1–5), Subjects 6–14
-**Next:** Operators & CRDs (Subject 15)
+**Completed:** Basic Level (1–5), Subjects 6–15
+**Next:** Production & Scaling (Subject 16)
 
 ---

@@ -1,0 +1,105 @@
+#!/usr/bin/env bash
+# pllama — send a prompt (+ optional images) to ollama, with optional conversation continuity
+#
+# Usage:
+#   pllama "text only"
+#   pllama -i image.jpg "one image"
+#   pllama -i a.jpg -i b.jpg "compare these"
+#   pllama -c mysession "start a conversation"
+#   pllama -c mysession "continue it"
+#   pllama -c mysession -x "end and wipe session"
+
+set -euo pipefail
+
+MODEL="${LLM_MODEL:-gemma4:e4b}"
+OLLAMA_URL="${OLLAMA_URL:-http://localhost:11434}"
+CONTEXT_DIR="${PLLAMA_CONTEXT_DIR:-$HOME/.pllama/sessions}"
+IMAGE_PATHS=()
+SESSION=""
+CLEAR=false
+
+# ── Usage ─────────────────────────────────────────────────────────────────────
+usage() {
+  cat << EOF
+Usage: $(basename "$0") [-i <image>]... [-c <session>] [-x] <prompt>
+
+  -i  Image file (repeatable)
+  -c  Session name — saves and restores conversation context
+  -x  Clear the session after this call
+  -h  Show this help
+EOF
+  exit 1
+}
+
+while getopts "i:c:xh" opt; do
+  case $opt in
+    i) IMAGE_PATHS+=("$OPTARG") ;;
+    c) SESSION="$OPTARG" ;;
+    x) CLEAR=true ;;
+    h) usage ;;
+    *) usage ;;
+  esac
+done
+shift $((OPTIND - 1))
+
+if [[ $# -eq 0 ]]; then usage; fi
+
+for cmd in jq curl base64; do
+  if ! command -v "$cmd" &>/dev/null; then
+    echo "Error: '$cmd' not found." >&2
+    exit 1
+  fi
+done
+
+# ── Images ────────────────────────────────────────────────────────────────────
+IMAGES_JSON="[]"
+for path in "${IMAGE_PATHS[@]}"; do
+  [[ ! -f "$path" ]] && { echo "Error: image not found: $path" >&2; exit 1; }
+  B64=$(base64 -i "$path")
+  IMAGES_JSON=$(echo "$IMAGES_JSON" | jq --arg img "$B64" '. += [$img]')
+done
+
+# ── Load session messages ─────────────────────────────────────────────────────
+MESSAGES_JSON="[]"
+if [[ -n "$SESSION" ]]; then
+  mkdir -p "$CONTEXT_DIR"
+  SESSION_FILE="$CONTEXT_DIR/$SESSION"
+  [[ -f "$SESSION_FILE" ]] && MESSAGES_JSON=$(cat "$SESSION_FILE")
+fi
+
+# ── Append new user message ───────────────────────────────────────────────────
+if [[ "${#IMAGE_PATHS[@]}" -gt 0 ]]; then
+  MESSAGES_JSON=$(echo "$MESSAGES_JSON" | jq \
+    --arg content "$*" \
+    --argjson images "$IMAGES_JSON" \
+    '. += [{"role":"user","content":$content,"images":$images}]')
+else
+  MESSAGES_JSON=$(echo "$MESSAGES_JSON" | jq \
+    --arg content "$*" \
+    '. += [{"role":"user","content":$content}]')
+fi
+
+# ── Payload ───────────────────────────────────────────────────────────────────
+PAYLOAD=$(jq -n \
+  --arg     model    "$MODEL" \
+  --argjson messages "$MESSAGES_JSON" \
+  '{"model":$model,"stream":false,"messages":$messages}')
+
+# ── Call ──────────────────────────────────────────────────────────────────────
+RESPONSE=$(curl -s "$OLLAMA_URL/api/chat" -d "$PAYLOAD")
+
+REPLY=$(jq -r '.message.content' <<< "$RESPONSE")
+echo "$REPLY"
+
+# ── Save updated session ──────────────────────────────────────────────────────
+if [[ -n "$SESSION" ]]; then
+  if $CLEAR; then
+    rm -f "$SESSION_FILE"
+    echo "(session '$SESSION' cleared)" >&2
+  else
+    echo "$MESSAGES_JSON" | jq \
+      --arg content "$REPLY" \
+      '. += [{"role":"assistant","content":$content}]' \
+      > "$SESSION_FILE"
+  fi
+fi

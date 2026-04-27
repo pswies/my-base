@@ -1,0 +1,130 @@
+#!/usr/bin/env bash
+# pllama-serve — optionally fetch a GGUF from HuggingFace, then start ollama serve
+#
+# Fetch + serve:
+#   pllama-serve -r TrevorJS/gemma-4-E4B-it-uncensored-GGUF \
+#                -f gemma-4-E4B-it-uncensored-Q4_K_M.gguf \
+#                -n gemma4-abliterated
+#
+# Serve only (model already registered):
+#   pllama-serve
+
+set -euo pipefail
+
+MODELS_DIR="$HOME/models"
+SYSTEM_PROMPT=""
+HF_REPO=""
+GGUF_FILE=""
+OLLAMA_NAME=""
+HF_TOKEN="${HF_TOKEN:-}"
+
+# ── Usage ─────────────────────────────────────────────────────────────────────
+usage() {
+  cat << EOF
+Usage: $(basename "$0") [-r <hf_repo> -f <gguf_filename> -n <ollama_name>] [-d <models_dir>] [-s <system_prompt>]
+
+Fetch options (all three required together to trigger a download):
+  -r  HuggingFace repo         e.g. TrevorJS/gemma-4-E4B-it-uncensored-GGUF
+  -f  GGUF filename            e.g. gemma-4-E4B-it-uncensored-Q4_K_M.gguf
+  -n  Ollama model name        e.g. gemma4-abliterated
+
+Optional:
+  -d  Local models directory   Default: ~/models
+  -s  System prompt            Written into the Modelfile if provided
+  -t  HuggingFace token        For gated models (or set HF_TOKEN env var)
+  -h  Show this help
+
+If no fetch options are given, starts ollama serve immediately.
+EOF
+  exit 1
+}
+
+# ── Argument parsing ──────────────────────────────────────────────────────────
+while getopts "r:f:n:d:s:t:h" opt; do
+  case $opt in
+    r) HF_REPO="$OPTARG" ;;
+    f) GGUF_FILE="$OPTARG" ;;
+    n) OLLAMA_NAME="$OPTARG" ;;
+    d) MODELS_DIR="$OPTARG" ;;
+    s) SYSTEM_PROMPT="$OPTARG" ;;
+    t) HF_TOKEN="$OPTARG" ;;
+    h) usage ;;
+    *) usage ;;
+  esac
+done
+
+# ── Dependency checks ─────────────────────────────────────────────────────────
+for cmd in ollama; do
+  if ! command -v "$cmd" &>/dev/null; then
+    echo "Error: '$cmd' not found." >&2
+    echo "  brew install ollama" >&2
+    exit 1
+  fi
+done
+
+# ── Start server in background if fetch is needed ────────────────────────────
+
+# Detect if any fetch flag was provided
+if [[ -n "$HF_REPO" || -n "$GGUF_FILE" || -n "$OLLAMA_NAME" ]]; then
+  # All three must be present
+  for var in HF_REPO GGUF_FILE OLLAMA_NAME; do
+    if [[ -z "${!var}" ]]; then
+      echo "Error: -r, -f, and -n must all be provided together." >&2
+      usage
+    fi
+  done
+
+  if ! command -v hf &>/dev/null; then
+    echo "Error: 'hf' not found." >&2
+    echo "  pip install huggingface_hub[cli]" >&2
+    exit 1
+  fi
+
+  MODEL_DIR="$MODELS_DIR/$OLLAMA_NAME"
+  GGUF_PATH="$MODEL_DIR/$GGUF_FILE"
+
+  mkdir -p "$MODEL_DIR"
+
+  if [[ -f "$GGUF_PATH" ]]; then
+    echo "→ GGUF already exists, skipping download: $GGUF_PATH"
+  else
+    echo "→ Downloading $GGUF_FILE from $HF_REPO ..."
+    TOKEN_ARG=()
+    [[ -n "$HF_TOKEN" ]] && TOKEN_ARG=(--token "$HF_TOKEN")
+    hf download "$HF_REPO" \
+      --include "$GGUF_FILE" \
+      --local-dir "$MODEL_DIR" \
+      "${TOKEN_ARG[@]}"
+  fi
+
+  echo "→ Writing Modelfile ..."
+  {
+    echo "FROM ./$GGUF_FILE"
+    [[ -n "$SYSTEM_PROMPT" ]] && echo "SYSTEM \"\"\"$SYSTEM_PROMPT\"\"\""
+  } > "$MODEL_DIR/Modelfile"
+
+  echo "→ Starting ollama serve in background for registration ..."
+  ollama serve &
+  OLLAMA_BG_PID=$!
+
+  # Wait until the server is ready
+  echo "→ Waiting for ollama server ..."
+  for i in $(seq 1 30); do
+    curl -sf http://localhost:11434 &>/dev/null && break
+    sleep 1
+  done
+
+  echo "→ Registering '$OLLAMA_NAME' with Ollama ..."
+  ollama create "$OLLAMA_NAME" -f "$MODEL_DIR/Modelfile"
+
+  echo "✓ Model registered as: $OLLAMA_NAME"
+  echo ""
+
+  # Bring background server to foreground
+  echo "→ ollama serve running  (Ctrl+C to stop)"
+  wait "$OLLAMA_BG_PID"
+else
+  # ── Serve only ───────────────────────────────────────────────────────────────
+  echo "→ Starting ollama serve  (Ctrl+C to stop)"
+  exec ollama serve
+fi
