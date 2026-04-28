@@ -8,6 +8,9 @@
 #   pllama -c mysession "start a conversation"
 #   pllama -c mysession "continue it"
 #   pllama -c mysession -x "end and wipe session"
+#
+# Get syntax-highlighted Markdown with:
+#   pllama "some prompt" | bat -l md --style plain
 
 set -euo pipefail
 
@@ -20,7 +23,7 @@ CLEAR=false
 
 # ── Usage ─────────────────────────────────────────────────────────────────────
 usage() {
-  cat << EOF
+  cat <<EOF
 Usage: $(basename "$0") [-i <image>]... [-c <session>] [-x] <prompt>
 
   -i  Image file (repeatable)
@@ -33,11 +36,11 @@ EOF
 
 while getopts "i:c:xh" opt; do
   case $opt in
-    i) IMAGE_PATHS+=("$OPTARG") ;;
-    c) SESSION="$OPTARG" ;;
-    x) CLEAR=true ;;
-    h) usage ;;
-    *) usage ;;
+  i) IMAGE_PATHS+=("$OPTARG") ;;
+  c) SESSION="$OPTARG" ;;
+  x) CLEAR=true ;;
+  h) usage ;;
+  *) usage ;;
   esac
 done
 shift $((OPTIND - 1))
@@ -54,7 +57,10 @@ done
 # ── Images ────────────────────────────────────────────────────────────────────
 IMAGES_JSON="[]"
 for path in "${IMAGE_PATHS[@]}"; do
-  [[ ! -f "$path" ]] && { echo "Error: image not found: $path" >&2; exit 1; }
+  [[ ! -f "$path" ]] && {
+    echo "Error: image not found: $path" >&2
+    exit 1
+  }
   B64=$(base64 -i "$path")
   IMAGES_JSON=$(echo "$IMAGES_JSON" | jq --arg img "$B64" '. += [$img]')
 done
@@ -81,15 +87,24 @@ fi
 
 # ── Payload ───────────────────────────────────────────────────────────────────
 PAYLOAD=$(jq -n \
-  --arg     model    "$MODEL" \
+  --arg model "$MODEL" \
   --argjson messages "$MESSAGES_JSON" \
-  '{"model":$model,"stream":false,"messages":$messages}')
+  '{"model":$model,"stream":true,"messages":$messages}')
 
 # ── Call ──────────────────────────────────────────────────────────────────────
-RESPONSE=$(curl -s "$OLLAMA_URL/api/chat" -d "$PAYLOAD")
-
-REPLY=$(jq -r '.message.content' <<< "$RESPONSE")
-echo "$REPLY"
+REPLY_FILE=$(mktemp)
+while IFS= read -r line; do
+  [[ -z "$line" ]] && continue
+  [[ $(jq -r '.done' <<<"$line") == "true" ]] && break
+  jq -rj '.message.content // empty' <<<"$line" | tee -a "$REPLY_FILE"
+done < <(curl -sN "$OLLAMA_URL/api/chat" -d "$PAYLOAD")
+printf '\n'
+REPLY=$(
+  cat "$REPLY_FILE"
+  printf x
+)
+REPLY="${REPLY%x}"
+rm -f "$REPLY_FILE"
 
 # ── Save updated session ──────────────────────────────────────────────────────
 if [[ -n "$SESSION" ]]; then
@@ -100,6 +115,6 @@ if [[ -n "$SESSION" ]]; then
     echo "$MESSAGES_JSON" | jq \
       --arg content "$REPLY" \
       '. += [{"role":"assistant","content":$content}]' \
-      > "$SESSION_FILE"
+      >"$SESSION_FILE"
   fi
 fi
