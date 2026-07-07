@@ -1,1 +1,1 @@
-Compile with: pdflatex piotr-swies-cc.tex
+Compile with: pdflatex piotr-swies-cv.tex
