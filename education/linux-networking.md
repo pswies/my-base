@@ -74,6 +74,7 @@
 * [ ] Network stack internals
 * [ ] Interrupts & NICs
 * [ ] eBPF basics
+* [ ] Capabilities vs. old-school UID 0; not strictly networking but let's discuss it. How can a Linux user control fine-grained permissions of applications/programs?
 
 ---
 
