@@ -114,9 +114,9 @@ render_metric() {
   else
     color="$GREEN"
   fi
-  # 5 segments, 20% each.
-  local filled=$((pct_int / 20))
-  local empty=$((5 - filled))
+  # 7 segments, ~14.3% each (truncated).
+  local filled=$((pct_int * 7 / 100))
+  local empty=$((7 - filled))
   local fill_str empty_str
   fill_str=$(repeat "█" "$filled")
   empty_str=$(repeat "░" "$empty")
@@ -132,7 +132,7 @@ segments=()
 
 ctx_tokens_display=$(format_tokens "$ctx_tokens")
 ctx_str=$(render_metric "ctx" "$used_pct" "$ctx_tokens_display")
-[ -z "$ctx_str" ] && ctx_str=$(printf "${DIM}ctx [.....] n/a${RESET}")
+[ -z "$ctx_str" ] && ctx_str=$(printf "${DIM}ctx [.......] n/a${RESET}")
 segments+=("$ctx_str")
 
 five_str=$(render_metric "5h" "$five")
