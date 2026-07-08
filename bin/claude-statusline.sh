@@ -13,25 +13,17 @@ YELLOW='\033[33m'
 RED='\033[31m'
 CYAN='\033[36m'
 
-model=$(echo "$input" | jq -r '.model.display_name // "unknown"')
+# Model family only (first word of the display name), e.g. "Fable 5" ->
+# "Fable", "Opus 4.8 (1M context)" -> "Opus".
+model=$(echo "$input" | jq -r '(.model.display_name // "unknown") | split(" ")[0]')
 
-# Current directory (basename only) and its git branch, when determinable.
-# The branch half is hidden gracefully when the directory isn't a git repo
-# (or git isn't on PATH); the directory name itself still shows whenever
-# workspace.current_dir is present.
+# Current directory, basename only. Omitted when workspace.current_dir isn't
+# present in the payload.
 cwd_path=$(echo "$input" | jq -r '.workspace.current_dir // empty')
 dir_str=""
 if [ -n "$cwd_path" ]; then
   dir_name=$(basename "$cwd_path")
-  branch=""
-  if command -v git >/dev/null 2>&1; then
-    branch=$(git -C "$cwd_path" --no-optional-locks branch --show-current 2>/dev/null)
-  fi
-  if [ -n "$branch" ]; then
-    dir_str=$(printf "${DIM}%s (%s)${RESET}" "$dir_name" "$branch")
-  else
-    dir_str=$(printf "${DIM}%s${RESET}" "$dir_name")
-  fi
+  dir_str=$(printf "${DIM}%s${RESET}" "$dir_name")
 fi
 
 used_pct=$(echo "$input" | jq -r '.context_window.used_percentage // empty')
