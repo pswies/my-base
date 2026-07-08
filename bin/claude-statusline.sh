@@ -6,7 +6,34 @@
 
 input=$(cat)
 
+RESET='\033[0m'
+DIM='\033[2m'
+GREEN='\033[32m'
+YELLOW='\033[33m'
+RED='\033[31m'
+CYAN='\033[36m'
+
 model=$(echo "$input" | jq -r '.model.display_name // "unknown"')
+
+# Current directory (basename only) and its git branch, when determinable.
+# The branch half is hidden gracefully when the directory isn't a git repo
+# (or git isn't on PATH); the directory name itself still shows whenever
+# workspace.current_dir is present.
+cwd_path=$(echo "$input" | jq -r '.workspace.current_dir // empty')
+dir_str=""
+if [ -n "$cwd_path" ]; then
+  dir_name=$(basename "$cwd_path")
+  branch=""
+  if command -v git >/dev/null 2>&1; then
+    branch=$(git -C "$cwd_path" --no-optional-locks branch --show-current 2>/dev/null)
+  fi
+  if [ -n "$branch" ]; then
+    dir_str=$(printf "${DIM}%s (%s)${RESET}" "$dir_name" "$branch")
+  else
+    dir_str=$(printf "${DIM}%s${RESET}" "$dir_name")
+  fi
+fi
+
 used_pct=$(echo "$input" | jq -r '.context_window.used_percentage // empty')
 five=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // empty')
 week=$(echo "$input" | jq -r '.rate_limits.seven_day.used_percentage // empty')
@@ -48,13 +75,6 @@ spend_limit_usd=$(echo "$input" | jq -r '
     // .spend_limit.limit_usd)
   // empty' 2>/dev/null)
 
-RESET='\033[0m'
-DIM='\033[2m'
-GREEN='\033[32m'
-YELLOW='\033[33m'
-RED='\033[31m'
-CYAN='\033[36m'
-
 repeat() {
   local char="$1" count="$2" out="" i
   for ((i = 0; i < count; i++)); do
@@ -94,8 +114,9 @@ render_metric() {
   else
     color="$GREEN"
   fi
-  local filled=$((pct_int / 10))
-  local empty=$((10 - filled))
+  # 5 segments, 20% each.
+  local filled=$((pct_int / 20))
+  local empty=$((5 - filled))
   local fill_str empty_str
   fill_str=$(repeat "█" "$filled")
   empty_str=$(repeat "░" "$empty")
@@ -107,9 +128,11 @@ render_metric() {
 # segments are omitted entirely when their data isn't present yet.
 segments=()
 
+[ -n "$dir_str" ] && segments+=("$dir_str")
+
 ctx_tokens_display=$(format_tokens "$ctx_tokens")
 ctx_str=$(render_metric "ctx" "$used_pct" "$ctx_tokens_display")
-[ -z "$ctx_str" ] && ctx_str=$(printf "${DIM}ctx [..........] n/a${RESET}")
+[ -z "$ctx_str" ] && ctx_str=$(printf "${DIM}ctx [.....] n/a${RESET}")
 segments+=("$ctx_str")
 
 five_str=$(render_metric "5h" "$five")
