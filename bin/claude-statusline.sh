@@ -12,11 +12,12 @@ GREEN='\033[32m'
 YELLOW='\033[33m'
 RED='\033[31m'
 CYAN='\033[36m'
-# Bold cyan for metric labels (ctx/5h/7d/spend) — distinct from the
-# green/yellow/red used on the percentage values, and more prominent than
-# the dim styling used for the model name, directory, separators, and
-# parenthetical extras (token count, countdown, date).
-LABEL='\033[1;36m'
+# Mid-green (256-color, noticeably darker than the standard-green used on
+# percentage values) for the structural elements: metric labels
+# (ctx/5h/7d/spend), the model family name, and the directory/project name.
+# Separators and parenthetical extras (token count, countdown, date) stay
+# dim; percentage value colors (GREEN/YELLOW/RED below) are unchanged.
+LABEL='\033[1;38;5;28m'
 
 # Model family only (first word of the display name), e.g. "Fable 5" ->
 # "Fable", "Opus 4.8 (1M context)" -> "Opus".
@@ -28,7 +29,7 @@ cwd_path=$(echo "$input" | jq -r '.workspace.current_dir // empty')
 dir_str=""
 if [ -n "$cwd_path" ]; then
   dir_name=$(basename "$cwd_path")
-  dir_str=$(printf "${DIM}%s${RESET}" "$dir_name")
+  dir_str=$(printf "${LABEL}%s${RESET}" "$dir_name")
 fi
 
 used_pct=$(echo "$input" | jq -r '.context_window.used_percentage // empty')
@@ -110,7 +111,7 @@ format_tokens() {
   fi
 }
 
-# Render one "label NN% (extra)" segment: the label is bold cyan (the
+# Render one "label NN% (extra)" segment: the label is mid-green (the
 # structural element of the segment), the percentage number is color-coded
 # green/yellow/red by usage level (same thresholds for every metric:
 # context, 5h, 7d, spend), and the trailing "(extra)" — only appended when
@@ -161,7 +162,7 @@ elif [ -n "$spend_pct" ]; then
   [ -n "$spend_str" ] && segments+=("$spend_str")
 fi
 
-out=$(printf "${DIM}%s${RESET}" "$model")
+out=$(printf "${LABEL}%s${RESET}" "$model")
 for seg in "${segments[@]}"; do
   out="${out}$(printf " ${DIM}|${RESET} %s" "$seg")"
 done
