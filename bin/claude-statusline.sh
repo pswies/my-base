@@ -30,6 +30,23 @@ used_pct=$(echo "$input" | jq -r '.context_window.used_percentage // empty')
 five=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // empty')
 week=$(echo "$input" | jq -r '.rate_limits.seven_day.used_percentage // empty')
 
+# Time until the 5-hour rate-limit window resets, compact-formatted as
+# "XhYYm" (>=1h) or "XXm" (<1h). Hidden when resets_at is absent; a past
+# timestamp is clamped to 0 rather than shown as negative.
+five_resets_at=$(echo "$input" | jq -r '.rate_limits.five_hour.resets_at // empty')
+five_reset_str=""
+if [ -n "$five_resets_at" ]; then
+  five_remaining=$(( five_resets_at - $(date +%s) ))
+  [ "$five_remaining" -lt 0 ] && five_remaining=0
+  five_hours=$(( five_remaining / 3600 ))
+  five_minutes=$(( (five_remaining % 3600) / 60 ))
+  if [ "$five_hours" -ge 1 ]; then
+    five_reset_str=$(printf "%dh%02dm" "$five_hours" "$five_minutes")
+  else
+    five_reset_str=$(printf "%dm" "$five_minutes")
+  fi
+fi
+
 # Token count backing the ctx percentage, for display alongside it (e.g.
 # "42% (85k)"). Prefer the payload's own running total; if that's absent
 # but we still have a percentage and the window size, derive it. Omitted
@@ -127,7 +144,7 @@ ctx_str=$(render_metric "ctx" "$used_pct" "$ctx_tokens_display")
 [ -z "$ctx_str" ] && ctx_str=$(printf "${DIM}ctx [.......] n/a${RESET}")
 segments+=("$ctx_str")
 
-five_str=$(render_metric "5h" "$five")
+five_str=$(render_metric "5h" "$five" "$five_reset_str")
 [ -n "$five_str" ] && segments+=("$five_str")
 
 week_str=$(render_metric "7d" "$week")
