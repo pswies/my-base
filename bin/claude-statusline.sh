@@ -12,6 +12,11 @@ GREEN='\033[32m'
 YELLOW='\033[33m'
 RED='\033[31m'
 CYAN='\033[36m'
+# Bold cyan for metric labels (ctx/5h/7d/spend) — distinct from the
+# green/yellow/red used on the percentage values, and more prominent than
+# the dim styling used for the model name, directory, separators, and
+# parenthetical extras (token count, countdown, date).
+LABEL='\033[1;36m'
 
 # Model family only (first word of the display name), e.g. "Fable 5" ->
 # "Fable", "Opus 4.8 (1M context)" -> "Opus".
@@ -105,10 +110,12 @@ format_tokens() {
   fi
 }
 
-# Render one "label NN% (extra)" segment: the percentage number is
-# color-coded green/yellow/red by usage level (same thresholds for every
-# metric: context, 5h, 7d, spend). The trailing "(extra)" is only appended
-# when a third argument is given. Prints nothing if no percentage was given.
+# Render one "label NN% (extra)" segment: the label is bold cyan (the
+# structural element of the segment), the percentage number is color-coded
+# green/yellow/red by usage level (same thresholds for every metric:
+# context, 5h, 7d, spend), and the trailing "(extra)" — only appended when
+# a third argument is given — stays dim. Prints nothing if no percentage
+# was given.
 render_metric() {
   local label="$1" pct="$2" extra="$3"
   [ -z "$pct" ] && return
@@ -124,7 +131,7 @@ render_metric() {
   else
     color="$GREEN"
   fi
-  printf "${DIM}%s${RESET} ${color}%d%%${RESET}" "$label" "$pct_int"
+  printf "${LABEL}%s${RESET} ${color}%d%%${RESET}" "$label" "$pct_int"
   [ -n "$extra" ] && printf " ${DIM}(%s)${RESET}" "$extra"
 }
 
@@ -136,7 +143,7 @@ segments=()
 
 ctx_tokens_display=$(format_tokens "$ctx_tokens")
 ctx_str=$(render_metric "ctx" "$used_pct" "$ctx_tokens_display")
-[ -z "$ctx_str" ] && ctx_str=$(printf "${DIM}ctx n/a${RESET}")
+[ -z "$ctx_str" ] && ctx_str=$(printf "${LABEL}ctx${RESET} ${DIM}n/a${RESET}")
 segments+=("$ctx_str")
 
 five_str=$(render_metric "5h" "$five" "$five_reset_str")
@@ -148,7 +155,7 @@ week_str=$(render_metric "7d" "$week" "$week_reset_str")
 # Extra-usage spend-limit usage, appended as its own uniform-format segment
 # when present: prefer a $used/$limit pair, fall back to a bare percentage.
 if [ -n "$spend_usd" ] && [ -n "$spend_limit_usd" ]; then
-  segments+=("$(printf "${DIM}spend${RESET} ${CYAN}\$%.2f/\$%.2f${RESET}" "$spend_usd" "$spend_limit_usd")")
+  segments+=("$(printf "${LABEL}spend${RESET} ${CYAN}\$%.2f/\$%.2f${RESET}" "$spend_usd" "$spend_limit_usd")")
 elif [ -n "$spend_pct" ]; then
   spend_str=$(render_metric "spend" "$spend_pct")
   [ -n "$spend_str" ] && segments+=("$spend_str")
