@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Claude Code status line: model name, followed by uniform "label [bar] NN%"
+# Claude Code status line: model name, followed by uniform "label NN%"
 # segments — context usage, Claude.ai 5-hour / 7-day rate-limit usage, and
-# (when available) extra-usage spend-limit usage — all color-coded
-# green/yellow/red by usage level.
+# (when available) extra-usage spend-limit usage — with each percentage
+# number color-coded green/yellow/red by usage level.
 
 input=$(cat)
 
@@ -47,6 +47,15 @@ if [ -n "$five_resets_at" ]; then
   fi
 fi
 
+# Date the 7-day rate-limit window ends, e.g. "Jul 14". Hidden when
+# resets_at is absent. Tries BSD `date -r` (macOS) first, falls back to
+# GNU `date -d` for portability.
+week_resets_at=$(echo "$input" | jq -r '.rate_limits.seven_day.resets_at // empty')
+week_reset_str=""
+if [ -n "$week_resets_at" ]; then
+  week_reset_str=$(date -r "$week_resets_at" "+%b %-d" 2>/dev/null || date -d "@$week_resets_at" "+%b %-d" 2>/dev/null)
+fi
+
 # Token count backing the ctx percentage, for display alongside it (e.g.
 # "42% (85k)"). Prefer the payload's own running total; if that's absent
 # but we still have a percentage and the window size, derive it. Omitted
@@ -84,14 +93,6 @@ spend_limit_usd=$(echo "$input" | jq -r '
     // .spend_limit.limit_usd)
   // empty' 2>/dev/null)
 
-repeat() {
-  local char="$1" count="$2" out="" i
-  for ((i = 0; i < count; i++)); do
-    out+="$char"
-  done
-  printf '%s' "$out"
-}
-
 # Compact-format a raw token count: "85k"/"123k" above 1000, the raw number
 # below. Prints nothing if given an empty value.
 format_tokens() {
@@ -104,10 +105,10 @@ format_tokens() {
   fi
 }
 
-# Render one "label [bar] NN% (extra)" segment, color-coded green/yellow/red
-# by usage level (same thresholds for every metric: context, 5h, 7d, spend).
-# The trailing "(extra)" is only appended when a third argument is given.
-# Prints nothing if no percentage was given.
+# Render one "label NN% (extra)" segment: the percentage number is
+# color-coded green/yellow/red by usage level (same thresholds for every
+# metric: context, 5h, 7d, spend). The trailing "(extra)" is only appended
+# when a third argument is given. Prints nothing if no percentage was given.
 render_metric() {
   local label="$1" pct="$2" extra="$3"
   [ -z "$pct" ] && return
@@ -123,13 +124,7 @@ render_metric() {
   else
     color="$GREEN"
   fi
-  # 7 segments, ~14.3% each (truncated).
-  local filled=$((pct_int * 7 / 100))
-  local empty=$((7 - filled))
-  local fill_str empty_str
-  fill_str=$(repeat "█" "$filled")
-  empty_str=$(repeat "░" "$empty")
-  printf "${DIM}%s${RESET} ${color}[%s%s]${RESET} %d%%" "$label" "$fill_str" "$empty_str" "$pct_int"
+  printf "${DIM}%s${RESET} ${color}%d%%${RESET}" "$label" "$pct_int"
   [ -n "$extra" ] && printf " ${DIM}(%s)${RESET}" "$extra"
 }
 
@@ -141,13 +136,13 @@ segments=()
 
 ctx_tokens_display=$(format_tokens "$ctx_tokens")
 ctx_str=$(render_metric "ctx" "$used_pct" "$ctx_tokens_display")
-[ -z "$ctx_str" ] && ctx_str=$(printf "${DIM}ctx [.......] n/a${RESET}")
+[ -z "$ctx_str" ] && ctx_str=$(printf "${DIM}ctx n/a${RESET}")
 segments+=("$ctx_str")
 
 five_str=$(render_metric "5h" "$five" "$five_reset_str")
 [ -n "$five_str" ] && segments+=("$five_str")
 
-week_str=$(render_metric "7d" "$week")
+week_str=$(render_metric "7d" "$week" "$week_reset_str")
 [ -n "$week_str" ] && segments+=("$week_str")
 
 # Extra-usage spend-limit usage, appended as its own uniform-format segment
