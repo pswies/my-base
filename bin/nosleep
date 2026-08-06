@@ -1,0 +1,6 @@
+#!/bin/bash
+[ "$EUID" -ne 0 ] && exec sudo "$0" "$@"
+trap 'pmset -a disablesleep 0 sleep 1 displaysleep 10 disksleep 10 powernap 1 standby 1 autopoweroff 1 2>/dev/null; echo; echo Restored.' EXIT
+pmset -a disablesleep 1 sleep 0 displaysleep 0 disksleep 0 powernap 0 standby 0 autopoweroff 0 tcpkeepalive 1 womp 1 ttyskeepawake 1 2>/dev/null
+echo "Sleep disabled. Ctrl+C to restore."
+caffeinate -dimsu
