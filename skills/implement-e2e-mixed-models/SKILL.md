@@ -1,16 +1,24 @@
 ---
 name: implement-e2e-mixed-models
-description: End-to-end task implementation with mixed models — deep interactive planning, plan written into a GitHub issue (or a local plan file when issues are unavailable) and checked off as work lands, explicit user "go", then Opus implements while Fable reviews and runs ops, looping until the reviewer approves everything and CI plus all other checks are green, ending with a PR handed to the user for approval. Use when the user asks to implement a task end-to-end with this workflow.
+description: End-to-end task implementation with mixed models — deep interactive planning, plan written into a GitHub issue (or a local plan file when issues are unavailable) and checked off as work lands, explicit user "go", then Opus subagents implement while the current session model reviews and runs ops, looping until the reviewer approves everything and CI plus all other checks are green, ending with a PR handed to the user for approval. Use when the user asks to implement a task end-to-end with this workflow.
 ---
 
 # Implement end-to-end with mixed models
 
 A full task lifecycle with a strict division of labor:
 
-- **Fable (the main session — you)**: deep planning, writing the plan issue, code review, and all ops (git, `gh`, CI monitoring, running tests, deployments-adjacent commands).
+- **The current model (the main session — you, whichever model is active)**: deep planning, writing the plan issue, code review, and all ops (git, `gh`, CI monitoring, running tests, deployments-adjacent commands).
 - **Opus (subagents via the Agent tool, `model: "opus"`)**: all implementation — writing and editing the code.
 
 Never write implementation code yourself in this workflow; delegate it to Opus. Never delegate review or ops to Opus; keep those in the main session.
+
+## Phase 0 — Announce the model split
+
+Before anything else, print a short summary naming the **actual** models this run will use — the main session model by its real name (read it from your own environment, don't guess or use a placeholder), and Opus for the implementer subagents. For example:
+
+> **Models for this run** — main session: *\<actual active model\>* (planning, review, ops, git/CI). Implementer subagents: *Opus* (all code writing and edits).
+
+When the active session model is already Opus, say so plainly and note that review and implementation will run on the same model in separate contexts — the user may want to switch the session model first to get an independent reviewer.
 
 ## Phase 1 — Deep planning (interactive)
 
@@ -40,7 +48,7 @@ On "go":
 3. Keep the implementer's ID — later fix rounds go to the **same agent** via `SendMessage` so it retains context, rather than spawning fresh agents.
 4. For large plans, you may split independent work items across parallel Opus agents (worktree isolation if they'd conflict), but one agent per coherent change is the default.
 
-## Phase 5 — Review/fix loop (Fable reviews, Opus fixes)
+## Phase 5 — Review/fix loop (the main session reviews, Opus fixes)
 
 Loop until clean:
 
